@@ -33,7 +33,10 @@ export class LazyImage extends LazyBase<LazyImageProps> {
     }
 
     componentWillUnmount() {
-        this.setVisibility(false)
+        if (this._imageElement.current) {
+            this._imageElement.current.src = ""
+            this._imageElement.current.srcset = ""
+        }
         super.componentWillUnmount()
     }
 
@@ -61,7 +64,7 @@ export class LazyImage extends LazyBase<LazyImageProps> {
             this._imageElement.current.src = newSrc
         }
         const newSrcSet = show ? this.props.srcSet : this.placeholderImageSrc
-        if (this.props.src && newSrcSet && newSrcSet !== this._imageElement.current.srcset) {
+        if (this.props.srcSet && newSrcSet && newSrcSet !== this._imageElement.current.srcset) {
             this._imageElement.current.srcset = newSrcSet
         }
     }
@@ -69,18 +72,22 @@ export class LazyImage extends LazyBase<LazyImageProps> {
     render() {
 
         return (
-                <LazyElement timeout={this.props.timeout} loadTimeout={this.props.loadTimeout}
-                             root={this.props.root} rootMargin={this.props.rootMargin}
-                    element={() => {
-                        this.setVisibility(true, this.props.loadTimeout)
-                        return <img ref={this._imageElement} className={this.props.className} src={this.placeholderImageSrc} alt={this.props.alt} />}
-                    }
+            <LazyElement timeout={this.props.timeout} loadTimeout={this.props.loadTimeout}
+                         root={this.props.root} rootMargin={this.props.rootMargin}
+                         element={() => {
+                             this.setVisibility(true, this.props.loadTimeout)
+                             return <img ref={this._imageElement} className={this.props.className}
+                                         src={this.props.src ? this.placeholderImageSrc : undefined}
+                                         srcSet={this.props.srcSet ? this.placeholderImageSrc : undefined} alt={this.props.alt} />}
+                         }
 
-                    placeholder={() => {
-                        this.setVisibility(!!this.props.disabled, this.props.unloadTimeout)
-                        return <img ref={this._imageElement} className={this.props.className} src={this.placeholderImageSrc} alt={this.props.alt} />}
-                    }
-                />
+                         placeholder={() => {
+                             this.setVisibility(!!this.props.disabled, this.props.unloadTimeout)
+                             return <img ref={this._imageElement} className={this.props.className}
+                                         src={this.props.src ? this.placeholderImageSrc : undefined}
+                                         srcSet={this.props.srcSet ? this.placeholderImageSrc : undefined} alt={this.props.alt} />}
+                         }
+            />
         )
     }
 }
