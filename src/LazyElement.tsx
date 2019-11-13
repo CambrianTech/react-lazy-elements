@@ -4,8 +4,6 @@ import Observer from '@researchgate/react-intersection-observer'
 const LOAD_TIMEOUT_DEFAULT_MS = 500
 const UNLOAD_TIMEOUT_DEFAULT_MS = 3000
 
-//https://blog.arnellebalane.com/the-intersection-observer-api-d441be0b088d
-
 interface LazyBaseProps {
     timeout?:number
     loadTimeout?:number | null
@@ -94,4 +92,5 @@ export class LazyElement extends LazyBase<LazyElementProps> {
         );
     }
 }
+
 
