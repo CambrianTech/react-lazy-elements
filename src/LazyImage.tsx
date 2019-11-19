@@ -14,6 +14,7 @@ type LazyImageProps = {
     srcSet?:string
     alt?:string
     placeholderSrc?:string
+    maintainSize?:boolean
     getImageSource?:() => ImageSource
     placeholder?:() => ReactElement
 }
@@ -34,8 +35,14 @@ export class LazyImage extends LazyBase<LazyImageProps> {
 
     componentWillUnmount() {
         if (this._imageElement.current) {
+            const size = this._imageElement.current.getBoundingClientRect()
             this._imageElement.current.src = ""
             this._imageElement.current.srcset = ""
+
+            if (this.props.maintainSize) {
+                this._imageElement.current.style.width = `${size.width}px`
+                this._imageElement.current.style.height = `${size.height}px`
+            }
         }
         super.componentWillUnmount()
     }
