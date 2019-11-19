@@ -35,16 +35,21 @@ export class LazyImage extends LazyBase<LazyImageProps> {
 
     componentWillUnmount() {
         if (this._imageElement.current) {
-            const size = this._imageElement.current.getBoundingClientRect()
-            this._imageElement.current.src = ""
-            this._imageElement.current.srcset = ""
-
-            if (this.props.maintainSize) {
-                this._imageElement.current.style.width = `${size.width}px`
-                this._imageElement.current.style.height = `${size.height}px`
-            }
+            this._imageElement.current.src = blankImageSrc
+            this._imageElement.current.srcset = blankImageSrc
         }
         super.componentWillUnmount()
+    }
+
+    private maintainSize() {
+        if (this._imageElement.current) {
+            const element = this._imageElement.current
+            element.onload = ()=>{
+                const size = element.getBoundingClientRect()
+                element.style.width = `${size.width}px`
+                element.style.height = `${size.height}px`
+            }
+        }
     }
 
     protected get placeholderImageSrc(): string {
@@ -73,6 +78,9 @@ export class LazyImage extends LazyBase<LazyImageProps> {
         const newSrcSet = show ? this.props.srcSet : this.placeholderImageSrc
         if (this.props.srcSet && newSrcSet && newSrcSet !== this._imageElement.current.srcset) {
             this._imageElement.current.srcset = newSrcSet
+        }
+        if (show && this.props.maintainSize) {
+            this.maintainSize()
         }
     }
 

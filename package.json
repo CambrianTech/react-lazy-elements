@@ -1,6 +1,6 @@
 {
   "name": "react-lazy-elements",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Lazy elements for react",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
