@@ -1,11 +1,26 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import './App.css';
 import {LazyImage} from "react-lazy-elements";
 
 const App: React.FC = () => {
-  return (
+
+    const imageList = useMemo(() => {
+        const images = []
+
+        for (let i = 0; i < 200; i++) {
+            images.push({key:`image-${i}`, src:"cat.jpg"})
+        }
+
+        return images
+    }, []);
+
+    return (
     <div className="App">
-      <LazyImage src={"logo192.png"}  />
+        {imageList.map(image =>
+            <div key={image.key}>
+                <LazyImage maintainSize src={image.src}  />
+            </div>
+        )}
     </div>
   );
 }
