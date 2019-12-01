@@ -11,13 +11,29 @@ interface LazyBaseProps {
     root?: string | Element | null
     rootMargin?: string
     disabled?: boolean
+    visibilityWillChange?:(visible:boolean)=>void
 }
 
 export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any> {
 
-    constructor(props:any) {
-        super(props);
-        this.state = {visible: false, timeout:0};
+    protected get isVisible():boolean {
+        if (this.isMounted) {
+            return this.state.visible
+        }
+        return false
+    }
+
+    protected set isVisible(visible:boolean) {
+        if (this.isMounted) {
+            this.visibilityWillChange(visible)
+            this.setState({visible: visible});
+        }
+    }
+
+    protected visibilityWillChange(visible:boolean):void {
+        if (this.props.visibilityWillChange) {
+            this.props.visibilityWillChange(visible)
+        }
     }
 
     private _isMounted: boolean = false;
@@ -28,10 +44,12 @@ export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any
     private _handle = 0;
 
     componentDidMount() {
+        this.setState({visible: false});
         this._isMounted = true
     }
 
     componentWillUnmount() {
+        this.visibilityWillChange(false)
         this._isMounted = false
         if (this._handle) {
             clearInterval(this._handle)
@@ -42,7 +60,7 @@ export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any
         return !!this.props.disabled;
     }
 
-    handleIntersection(event:IntersectionObserverEntry) {
+    protected handleIntersection(event:IntersectionObserverEntry) {
 
         if (!this.isMounted) return
 
@@ -51,7 +69,7 @@ export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any
             window.clearInterval(this._handle)
         }
 
-        let period:any;
+        let period:any
 
         if (event.isIntersecting) {
             period = this.props.loadTimeout !== undefined ? this.props.loadTimeout : LOAD_TIMEOUT_DEFAULT_MS
@@ -60,15 +78,11 @@ export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any
         }
 
         if (period === 0) {
-            if (this._isMounted) {
-                this.setState({visible: event.isIntersecting})
-            }
+            this.isVisible = event.isIntersecting
         } else {
             this._handle = window.setTimeout(() => {
-                if (this.state.visible === event.isIntersecting) return
-                if (this._isMounted) {
-                    this.setState({visible: event.isIntersecting})
-                }
+                if (this.isVisible === event.isIntersecting) return
+                this.isVisible = event.isIntersecting
             }, period)
         }
     }
@@ -77,16 +91,16 @@ export abstract class LazyBase<S> extends React.Component<S & LazyBaseProps, any
 type LazyElementProps = {
     className?:string
     placeholder?:() => ReactElement
-    element:() => ReactElement
+    children?:React.ReactElement<any> | null | undefined
 }
 
 export class LazyElement extends LazyBase<LazyElementProps> {
     render() {
         if (this.observerDisabled()) {
-            return <div className={this.props.className}> {this.props.element()} </div>
+            return this.props.children
         } else return (
             <Observer root={this.props.root} rootMargin={this.props.rootMargin} onChange={(event:IntersectionObserverEntry) => this.handleIntersection(event)}>
-                {this.state.visible && this.isMounted ? this.props.element()
+                {this.isVisible ? this.props.children
                     : this.props.placeholder ? this.props.placeholder() : <div className={this.props.className} /> }
             </Observer>
         );
