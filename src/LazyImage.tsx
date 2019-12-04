@@ -35,19 +35,6 @@ export class LazyImage extends LazyBase<LazyImageProps> {
         }
     }
 
-    componentDidMount() {
-        super.componentDidMount()
-
-        if (this._imageElement.current) {
-            if (this.props.src) {
-                this._imageElement.current.src = this.props.loadOnMount ? this.props.src : blankImageSrc
-            }
-            if (this.props.srcSet) {
-                this._imageElement.current.srcset = this.props.loadOnMount ? this.props.srcSet : blankImageSrc
-            }
-        }
-    }
-
     componentWillUnmount() {
         if (this._imageElement.current) {
             this._imageElement.current.src = blankImageSrc
@@ -91,7 +78,10 @@ export class LazyImage extends LazyBase<LazyImageProps> {
 
     render() {
         return <Observer root={this.props.root} rootMargin={this.props.rootMargin} onChange={(event:IntersectionObserverEntry) => this.handleIntersection(event)}>
-            <img ref={this._imageElement} className={this.props.className} alt={this.props.alt} />
+            <img ref={this._imageElement} className={this.props.className} alt={this.props.alt}
+                 src={this.props.src ? (this.props.loadOnMount ? this.props.src : blankImageSrc) : undefined}
+                 srcSet={this.props.srcSet ? (this.props.loadOnMount ? this.props.srcSet : blankImageSrc) : undefined}
+            />
         </Observer>
     }
 }
