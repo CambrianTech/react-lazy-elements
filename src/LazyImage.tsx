@@ -19,6 +19,7 @@ type LazyImageProps = {
     loadOnMount?:boolean
     getImageSource?:() => ImageSource
     placeholder?:() => ReactElement
+    visibilityWillChange?:(visible:boolean)=>void
 }
 
 export class LazyImage extends LazyBase<LazyImageProps> {
@@ -69,6 +70,10 @@ export class LazyImage extends LazyBase<LazyImageProps> {
             if (this.props.srcSet && newSrcSet && newSrcSet !== this._imageElement.current.srcset) {
                 this._imageElement.current.srcset = newSrcSet
             }
+        }
+
+        if (this.props.visibilityWillChange) {
+            this.props.visibilityWillChange(visible)
         }
 
         if (visible && this.props.maintainSize) {
