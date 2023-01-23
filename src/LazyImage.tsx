@@ -39,6 +39,9 @@ export class LazyImage extends LazyBase<LazyImageProps> {
 
     componentWillUnmount() {
         if (this._imageElement.current) {
+            if (this.props.crossOrigin) {
+                this._imageElement.current.crossOrigin = this.props.crossOrigin;
+            }
             this._imageElement.current.src = blankImageSrc
             this._imageElement.current.srcset = blankImageSrc
         }
@@ -70,6 +73,9 @@ export class LazyImage extends LazyBase<LazyImageProps> {
             const newSrcSet = visible ? this.props.srcSet : this.placeholderImageSrc
             if (this.props.srcSet && newSrcSet && newSrcSet !== this._imageElement.current.srcset) {
                 this._imageElement.current.srcset = newSrcSet
+            }
+            if (this.props.crossOrigin) {
+                this._imageElement.current.crossOrigin = this.props.crossOrigin;
             }
         }
 
